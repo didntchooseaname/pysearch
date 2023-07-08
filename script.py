@@ -62,7 +62,7 @@ def count_text_files(directory):
 
 # Continue to request input until "exit" is entered or Ctrl+C is pressed
 while True:
-    word_to_search = input("🔎 Enter a search string (or 'exit' to quit): ")
+    word_to_search = input("🔎 Enter a string to search (or 'exit' to quit): ")
     if word_to_search.lower() == 'exit' or word_to_search.lower() == 'quit':
         break
     search_words_in_directory(root_directory, word_to_search)
