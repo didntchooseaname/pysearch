@@ -34,14 +34,14 @@ def search_words_in_directory(directory, word):
                 file_count = search_words_in_file(filepath, word)
                 count += file_count
                 if file_count > 0:
-                    print(f"'{word}' was found {file_count} times in '{filename}'")
+                    print(f"✅ '{word}' was found {file_count} times in '{filename}'")
     
     if not txt_files_found:  # Check if no text files are found
-        print("No text files found.")  # Display the corresponding message
+        print("❌ No text files found.")  # Display the corresponding message
     
     if count == 0 and txt_files_found:  # Check if no occurrences are found in the text files
         file_count = count_text_files(directory)
-        print(f"Entry '{word}' not found in {file_count} text files")
+        print(f"❌ Entry '{word}' not found in {file_count} text files")
 
 def search_words_in_file(file, word):
     count = 0
@@ -62,7 +62,7 @@ def count_text_files(directory):
 
 # Continue to request input until "exit" is entered or Ctrl+C is pressed
 while True:
-    word_to_search = input("Enter a search string (or 'exit' to quit): ")
+    word_to_search = input("🔎 Enter a search string (or 'exit' to quit): ")
     if word_to_search.lower() == 'exit' or word_to_search.lower() == 'quit':
         break
     search_words_in_directory(root_directory, word_to_search)
