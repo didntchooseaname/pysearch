@@ -2,7 +2,7 @@
 
 Search any string in ton of text files.
 
-## Requirments
+## Requirements
 
 - python (any version)
 - pip (any version)
