@@ -15,4 +15,6 @@ You can install de dependency directly with `pip install -r tqdm` or:
 pip install -r requirments.txt
 ```
 
-rmpdups outpur and permit you to delete dupes in these files.
+In `script.py` you can choose a custom directory (under configuration area), where you want the search happen (Current directory by default).
+
+**rmpdups.py output and permit you to delete dupes in all txt files in the directory**
