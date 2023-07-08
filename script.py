@@ -11,6 +11,17 @@ __________         _________                           .__
  ▶️  Quickly find any string in all txt files of a directory.     
       """)
 
+###################################################
+#                 CONFIGURATION                   #
+###################################################
+
+# Root directory from which the search should begin
+root_directory = './'
+
+###################################################
+#              END OF CONFIGURATION               #
+###################################################
+
 def search_words_in_directory(directory, word):
     count = 0
     for root, dirs, files in os.walk(directory):
@@ -32,9 +43,6 @@ def search_words_in_file(file, word):
                 count += 1
 
     return count
-
-# Root directory from which the search should begin
-root_directory = './'
 
 # Continue to request input until "exit" is entered or Ctrl+C is pressed
 while True:
