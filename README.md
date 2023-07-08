@@ -1,6 +1,6 @@
 # 🔎 pysearch
 
-**Search any string in ton of text files.**
+**Search any string lightning fast and recursivly in ton of text files.**
 
 ## 📚 Requirements
 
