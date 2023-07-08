@@ -1,6 +1,38 @@
 import os
+import multiprocessing
 
-print(r"""
+def search_words_in_file(file, word):
+    count = 0
+    with open(file, 'r', errors='ignore') as f:
+        for line in f:
+            if word.lower() in line.lower():
+                count += 1
+    return count
+
+def search_words_in_directory(args):
+    directory, word = args
+    count = 0
+    results = []
+
+    for root, _, files in os.walk(directory):
+        for filename in files:
+            if filename.endswith('.txt'):
+                filepath = os.path.join(root, filename)
+                file_count = search_words_in_file(filepath, word)
+                count += file_count
+                if file_count > 0:
+                    results.append((filename, file_count))
+    
+    return count, results
+
+def count_text_files(directory):
+    count = 0
+    for root, _, files in os.walk(directory):
+        count += sum(filename.endswith('.txt') for filename in files)
+    return count
+
+if __name__ == "__main__":
+    print(r"""
 __________         _________                           .__     
 \______   \___.__./   _____/ ____ _____ _______   ____ |  |__  
  |     ___<   |  |\_____  \_/ __ \\__  \\_  __ \_/ ___\|  |  \ 
@@ -11,58 +43,40 @@ __________         _________                           .__
  ▶️  Quickly find any string in all text files of a directory.     
       """)
 
-###################################################
-#                 CONFIGURATION                   #
-###################################################
+    while True:
+        # Ask the directory to search in
+        root_directory = input("➡️  Directory to search in ('.' for current directory): ")
 
-# Root directory from which the search should begin
-root_directory = './'
+        # Check if the input directory is accessible
+        if not os.path.isdir(root_directory):
+            print("❌ The specified directory does not exist. Please try again.")
+        else:
+            break
 
-###################################################
-#              END OF CONFIGURATION               #
-###################################################
+    # Continue to request input until "exit" is entered or Ctrl+C is pressed
+    while True:
+        word_to_search = input("\n🔎 Enter a string to search (or 'exit' to quit): ")
+        if word_to_search.lower() in ('exit', 'quit'):
+            break
+        
+        # Create a list of directory-word pairs for multiprocessing
+        search_args = [(root_directory, word_to_search)]
 
-def search_words_in_directory(directory, word):
-    count = 0
-    txt_files_found = False  # Variable to track if text files are found
-    
-    for root, dirs, files in os.walk(directory):
-        for filename in files:
-            if filename.endswith('.txt'):
-                txt_files_found = True  # Set to True if a text file is found
-                filepath = os.path.join(root, filename)
-                file_count = search_words_in_file(filepath, word)
-                count += file_count
-                if file_count > 0:
-                    print(f"✅ '{word}' was found {file_count} times in '{filename}'")
-    
-    if not txt_files_found:  # Check if no text files are found
-        print("❌ No text files found.")  # Display the corresponding message
-    
-    if count == 0 and txt_files_found:  # Check if no occurrences are found in the text files
-        file_count = count_text_files(directory)
-        print(f"❌ Entry '{word}' not found in {file_count} text files")
+        num_processes = multiprocessing.cpu_count()  # Number of processes to use
+        with multiprocessing.Pool(processes=num_processes) as pool:
+            total_files = count_text_files(root_directory)
+            completed_files = 0
 
-def search_words_in_file(file, word):
-    count = 0
-    with open(file, 'r') as f:
-        for line_number, line in enumerate(f, start=1):
-            if word.lower() in line.lower():
-                count += 1
+            results = []
+            # Use the map function to process the search in parallel
+            for count, result in pool.imap_unordered(search_words_in_directory, search_args):
+                results.extend(result)
+                completed_files += count
 
-    return count
-
-def count_text_files(directory):
-    count = 0
-    for root, dirs, files in os.walk(directory):
-        for filename in files:
-            if filename.endswith('.txt'):
-                count += 1
-    return count
-
-# Continue to request input until "exit" is entered or Ctrl+C is pressed
-while True:
-    word_to_search = input("🔎 Enter a string to search (or 'exit' to quit): ")
-    if word_to_search.lower() == 'exit' or word_to_search.lower() == 'quit':
-        break
-    search_words_in_directory(root_directory, word_to_search)
+            # Display the results
+            if results:
+                print("\n🔍 Search Results:")
+                for filename, file_count in results:
+                    print(f"✅ '{word_to_search}' was found {file_count} times in '{filename}'")
+            else:
+                print(f"\n❌ Entry '{word_to_search}' not found in any text files.")

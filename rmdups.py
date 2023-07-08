@@ -1,58 +1,69 @@
 import os
 import re
 from collections import defaultdict
-from tqdm import tqdm
+
+if __name__ == "__main__":
+    print(r"""
+__________    _____  ________                      
+\______   \  /     \ \______ \  __ ________  ______
+ |       _/ /  \ /  \ |    |  \|  |  \____ \/  ___/
+ |    |   \/    Y    \|    `   \  |  /  |_> >___ \ 
+ |____|_  /\____|__  /_______  /____/|   __/____  >
+        \/         \/        \/      |__|       \/ 
+
+ ▶️  Find and remove duplicates string in all text files of a directory. Takes a long time on larger files.    
+      """)
 
 def find_duplicate_strings(directory):
     duplicates = defaultdict(list)
-    file_count = 0
-    for root, dirs, files in os.walk(directory):
-        for filename in files:
-            if filename.endswith('.txt'):
-                file_count += 1
-
-    progress_bar = tqdm(total=file_count, desc="Searching duplicates")
 
     for root, dirs, files in os.walk(directory):
         for filename in files:
             if filename.endswith('.txt'):
                 filepath = os.path.join(root, filename)
                 duplicates = find_duplicate_strings_in_file(filepath, duplicates)
-                progress_bar.update(1)
 
-    progress_bar.close()
     return duplicates
 
 def find_duplicate_strings_in_file(file, duplicates):
     strings = defaultdict(list)
-    with open(file, 'r') as f:
+    with open(file, 'r', encoding='utf-8', errors='ignore') as f:
         for line_number, line in enumerate(f, start=1):
-            stripped_line = line.strip()
-            cleaned_line = re.sub(r'[^-\w/.]+', '', stripped_line)
+            cleaned_line = re.sub(r'[^-\w/.]+', '', line.strip())
             strings[cleaned_line].append((file, line_number))
+
     for string, occurrences in strings.items():
         if len(occurrences) > 1:
             duplicates[string] += occurrences
+
     return duplicates
 
 def remove_duplicates(duplicates):
-    progress_bar = tqdm(total=len(duplicates), desc="Removing duplicates")
+    total_duplicates = len(duplicates)
+    processed_duplicates = 0
+
     for string, occurrences in duplicates.items():
         for file, line_number in occurrences:
             lines = []
-            with open(file, 'r') as f:
+            with open(file, 'r', encoding='utf-8', errors='ignore') as f:
                 lines = f.readlines()
 
             lines = [line for i, line in enumerate(lines, start=1) if not (i == line_number and re.sub(r'[^-\w/.]+', '', line.strip()) == string)]
 
-            with open(file, 'w') as f:
+            with open(file, 'w', encoding='utf-8') as f:
                 f.writelines(lines)
 
-            progress_bar.update(1)
-    progress_bar.close()
+            processed_duplicates += 1
+            percentage = (processed_duplicates / total_duplicates) * 100
+            print(f"Removing duplicates... {percentage:.2f}% complete")
 
-# Directory containing the text files to analyze
-root_directory = './'
+# Ask the directory to search in
+root_directory = input("Directory to search in ('.' for current directory): ")
+
+# Check if the input directory is accessible
+while not os.path.isdir(root_directory):
+    print("The specified directory does not exist. Please try again.")
+    root_directory = input("Directory to search in ('.' for current directory): ")
 
 # Find duplicate strings within files
 duplicate_strings = find_duplicate_strings(root_directory)
@@ -61,7 +72,7 @@ duplicate_strings = find_duplicate_strings(root_directory)
 if duplicate_strings:
     print("Duplicate strings found:")
     for string, occurrences in duplicate_strings.items():
-        if occurrences:
+        if len(occurrences) > 1:
             print(f"String: '{string}' ({len(occurrences)} duplicates)")
             for file, line_number in occurrences:
                 print(f"- File: {file}, Line: {line_number}")
