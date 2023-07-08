@@ -6,6 +6,7 @@
 
 - python (any version)
 - pip (any version)
+- The `tqdm` python module (progress bar)
 
 ## ⤵️ Install the dependency
 
